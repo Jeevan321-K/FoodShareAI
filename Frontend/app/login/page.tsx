@@ -21,36 +21,34 @@ export default function LoginPage() {
   setIsLoading(true);
 
   try {
-    // 💡 Use the Environment Variable with a fallback for local development
+    // 1. Correctly use the Environment Variable you set in Vercel
     const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "http://localhost:4000/api";
     
-    console.log(`Attempting login at: ${API_BASE}/auth/login`);
-
+    // 2. Use the individual 'email' and 'password' variables from your useState
     const res = await fetch(`${API_BASE}/auth/login`, {
       method: "POST",
       headers: {
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
       },
-      body: JSON.stringify({ email, password })
+      body: JSON.stringify({
+        email: email,     // ✅ Use 'email' directly
+        password: password // ✅ Use 'password' directly
+      }),
     });
 
     const data = await res.json();
 
     if (res.ok) {
-      // Store the auth data
       localStorage.setItem("token", data.token);
       localStorage.setItem("user", JSON.stringify(data.user));
-
-      // Redirect to dashboard
+      alert("Login successful! ✅");
       router.replace("/dashboard");
     } else {
-      // Show the specific error message from your backend
-      alert(data.message || "Login failed. Please check your credentials.");
+      alert(data.message || "Login failed");
     }
-
   } catch (err) {
-    console.error("Login connection error:", err);
-    alert("Could not connect to the server. Please try again later.");
+    console.error("Connection Error:", err);
+    alert("Could not connect to the server. Please check your internet or CORS settings.");
   } finally {
     setIsLoading(false);
   }
