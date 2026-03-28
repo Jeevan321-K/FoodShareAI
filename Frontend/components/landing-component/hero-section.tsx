@@ -1,12 +1,22 @@
 "use client"
 
+import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { ArrowRight, Sparkles } from "lucide-react"
 import Link from "next/link"
 
 export function HeroSection() {
-  const isLoggedIn =
-  typeof window !== "undefined" && localStorage.getItem("token")
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    const token = localStorage.getItem("token")
+    setIsLoggedIn(!!token)
+    setMounted(true)
+  }, [])
+
+  // 🚨 prevent hydration mismatch
+  if (!mounted) return null
   return (
     <section className="relative min-h-screen flex items-center justify-center pt-20 overflow-hidden">
       {/* Animated background gradient orbs */}
@@ -51,25 +61,24 @@ export function HeroSection() {
           
           {/* GET STARTED */}
           <Link href={isLoggedIn ? "/dashboard" : "/register"}>
-            <Button 
+        <Button 
               size="lg" 
               className="group relative bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg shadow-primary/25 px-8 py-6 text-lg"
             >
-              {isLoggedIn ? "Go to Dashboard" : "Get Started"}
-              <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
-            </Button>
-          </Link>
-
+          {isLoggedIn ? "Go to Dashboard" : "Get Started"}
+          <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
+        </Button>
+      </Link>
           {/* LOGIN */}
-          <Link href={isLoggedIn ? "/dashboard" : "/login"}>
-            <Button 
+      <Link href={isLoggedIn ? "/dashboard" : "/login"}>
+        <Button 
               size="lg" 
               variant="outline" 
               className="border-border/60 bg-background/50 backdrop-blur-sm text-foreground hover:bg-muted/50 px-8 py-6 text-lg"
             >
-              {isLoggedIn ? "Open App" : "Login"}
-            </Button>
-          </Link>
+          {isLoggedIn ? "Open App" : "Login"}
+        </Button>
+      </Link>
 
         </div>
 
