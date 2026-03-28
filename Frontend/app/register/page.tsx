@@ -24,9 +24,12 @@ const handleRegister = async (e: React.FormEvent) => {
   setIsLoading(true)
 
   try {
-    console.log("Sending request...")
+    // 💡 Use the Dynamic API Base from Vercel Env
+    const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "http://localhost:4000/api";
+    
+    console.log(`Registering via: ${API_BASE}/auth/register`);
 
-    const res = await fetch("http://localhost:4000/api/auth/register", {
+    const res = await fetch(`${API_BASE}/auth/register`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -45,12 +48,13 @@ const handleRegister = async (e: React.FormEvent) => {
       alert("Registered successfully ✅")
       router.push("/login")
     } else {
-      alert(data.message)
+      // Show the actual error from your Backend (e.g. "User already exists")
+      alert(data.message || "Registration failed")
     }
 
   } catch (err) {
-    console.error(err)
-    alert("Something went wrong")
+    console.error("Connection Error:", err)
+    alert("Could not connect to the server. Is the backend running?")
   } finally {
     setIsLoading(false)
   }

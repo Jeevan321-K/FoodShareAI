@@ -17,40 +17,44 @@ export default function LoginPage() {
   const [password, setPassword] = useState("")
 
   const handleLogin = async (e: React.FormEvent) => {
-  e.preventDefault()  // 🔥 VERY IMPORTANT
-
-  setIsLoading(true)
+  e.preventDefault();
+  setIsLoading(true);
 
   try {
-    console.log("Logging in...")
+    // 💡 Use the Environment Variable with a fallback for local development
+    const API_BASE = process.env.NEXT_PUBLIC_API_BASE || "http://localhost:4000/api";
+    
+    console.log(`Attempting login at: ${API_BASE}/auth/login`);
 
-    const res = await fetch("http://localhost:4000/api/auth/login", {
+    const res = await fetch(`${API_BASE}/auth/login`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
       },
       body: JSON.stringify({ email, password })
-    })
+    });
 
-    const data = await res.json()
-    console.log("Response:", data)
+    const data = await res.json();
 
     if (res.ok) {
-      localStorage.setItem("token", data.token)
-      localStorage.setItem("user", JSON.stringify(data.user))
+      // Store the auth data
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("user", JSON.stringify(data.user));
 
-      router.replace("/dashboard") // ✅ better than push
+      // Redirect to dashboard
+      router.replace("/dashboard");
     } else {
-      alert(data.message)
+      // Show the specific error message from your backend
+      alert(data.message || "Login failed. Please check your credentials.");
     }
 
   } catch (err) {
-    console.error("Login error:", err)
-    alert("Something went wrong")
+    console.error("Login connection error:", err);
+    alert("Could not connect to the server. Please try again later.");
   } finally {
-    setIsLoading(false)
+    setIsLoading(false);
   }
-}
+};
 
   return (
     <div className="min-h-screen flex bg-background">
