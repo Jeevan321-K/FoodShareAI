@@ -1,64 +1,60 @@
-import NGO from "../models/Ngo.js"
-import { calculateDistance } from "../utils/matchNgo.js"
+// No need to import Ngo here if you pass 'ngos' from the route/controller
 
-// weights
-const WEIGHTS = {
-  expiry: 0.5,
-  quantity: 0.3,
-  distance: 0.2
+function calculateDistance(lat1, lon1, lat2, lon2) {
+  const R = 6371;
+  const dLat = (lat2 - lat1) * (Math.PI / 180);
+  const dLon = (lon2 - lon1) * (Math.PI / 180);
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(lat1 * (Math.PI / 180)) * Math.cos(lat2 * (Math.PI / 180)) *
+    Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
 }
 
-// expiry score
-const getExpiryScore = (expiryTime) => {
-  const now = new Date()
-  const hoursLeft = (new Date(expiryTime) - now) / (1000 * 60 * 60)
-  return 1 / (hoursLeft + 1)
-}
+export async function findBestNGO(food, ngos, nlpBoost = 0) {
+  console.log("🤖 AI Matcher: Checking", ngos.length, "NGOs for food category:", food.category);
+  
+  let bestNgo = null;
+  let bestScore = -1;
 
-// quantity score
-const getQuantityScore = (quantity) => {
-  return Math.min(quantity / 100, 1)
-}
+  if (!food?.pickupLocation?.coordinates) return { bestNgo: null, bestScore: 0 };
 
-// final score
-const calculatePriorityScore = ({ expiryTime, quantity, distance }) => {
-  const expiryScore = getExpiryScore(expiryTime)
-  const quantityScore = getQuantityScore(quantity)
-  const distanceScore = 1 / (distance + 1)
+  const [foodLng, foodLat] = food.pickupLocation.coordinates;
+  const foodCat = food.category?.toLowerCase();
 
-  return (
-    WEIGHTS.expiry * expiryScore +
-    WEIGHTS.quantity * quantityScore +
-    WEIGHTS.distance * distanceScore
-  )
-}
+  ngos.forEach((ngo) => {
+    if (!ngo.location?.coordinates) return;
 
-// 🔥 MAIN FUNCTION
-export const findBestNGO = async (food) => {
-  const ngos = await NGO.find()
+    // 🟢 FIX: Flexible Category Match
+    // Your manual docs use 'category' (string), but code checks 'categories' (array)
+    const ngoCategory = ngo.category?.toLowerCase();
+    const ngoCategories = Array.isArray(ngo.categories) 
+        ? ngo.categories.map(c => c.toLowerCase()) 
+        : [ngoCategory];
 
-  let bestNgo = null
-  let bestScore = -1
+    // If the food category doesn't match the NGO's specialty, skip it
+    if (foodCat && !ngoCategories.includes(foodCat)) {
+        console.log(`Skipping ${ngo.name}: Category mismatch (${ngoCategory} vs ${foodCat})`);
+        return; 
+    }
 
-  for (let ngo of ngos) {
-    const distance = calculateDistance(
-      food.pickupLocation.lat,
-      food.pickupLocation.lng,
-      ngo.location.coordinates[1], // lat
-      ngo.location.coordinates[0]  // lng
-    )
+    const [ngoLng, ngoLat] = ngo.location.coordinates;
+    const distance = calculateDistance(foodLat, foodLng, ngoLat, ngoLng);
+    
+    // Scoring
+    const distanceScore = 1 / (distance + 1);
+    const foodQty = food.quantity?.value || 0;
+    const capacityScore = (ngo.capacity >= foodQty) ? 1 : 0.5;
+    const urgencyFactor = nlpBoost / 50;
 
-    const score = calculatePriorityScore({
-      expiryTime: food.expiryTime,
-      quantity: food.quantity.value,
-      distance
-    })
+    const score = (0.4 * distanceScore) + (0.3 * capacityScore) + (0.3 * urgencyFactor);
 
     if (score > bestScore) {
-      bestScore = score
-      bestNgo = ngo
+      bestScore = score;
+      bestNgo = ngo;
     }
-  }
+  });
 
-  return { bestNgo, bestScore }
+  return { bestNgo, bestScore: Math.max(bestScore, 0) };
 }

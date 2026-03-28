@@ -1,63 +1,48 @@
-import mongoose from "mongoose"
+import mongoose from "mongoose";
 
 const foodSchema = new mongoose.Schema(
   {
-    title: {
-      type: String,
-      required: true,
-    },
-
-    category: {
-      type: String,
-      required: true,
-    },
-
+    title: { type: String, required: true },
+    category: { type: String, required: true },
     quantity: {
       value: Number,
-      unit: String, // kg, plates, packets
+      unit: String,
+    },
+    description: { type: String },
+    
+    // ✅ FIXED: Changed to accept both simple strings or objects
+    // This prevents the "Cast to embedded failed" error you saw in the logs
+    images: {
+      type: [String], 
+      default: []
     },
 
-    description: {
-      type: String,
-    },
-
-    images: [
-      {
-        url: String,
-        public_id: String,
-      },
-    ],
-
+    // ✅ FIXED: Changed to GeoJSON for $near compatibility
     pickupLocation: {
       address: String,
-      lat: Number,
-      lng: Number,
+      type: { type: String, default: "Point" },
+      coordinates: { type: [Number], required: true }, // [longitude, latitude]
     },
 
-    expiryTime: {
-      type: Date,
-      required: true,
-    },
-
+    expiryTime: { type: Date, required: true },
     status: {
       type: String,
-      enum: ["available", "claimed", "expired"],
+      enum: ["available", "pending", "matched", "claimed", "collected", "expired"],
       default: "available",
     },
-
-    donor: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-    },
-
-    // 🔥 AI fields (IMPORTANT for hackathon)
+    donor: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
     priorityScore: Number,
-    matchedNgo: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Ngo",
+    matchedNgo: { type: mongoose.Schema.Types.ObjectId, ref: "Ngo" },
+    quality: {
+      type: String,
+      enum: ["FRESH", "MEDIUM", "UNSAFE"],
+      default: "FRESH",
     },
   },
   { timestamps: true }
-)
+);
 
-export default mongoose.model("Food", foodSchema)
+// 🔥 CRITICAL: Add this index so the NGO matching actually works!
+foodSchema.index({ "pickupLocation.coordinates": "2dsphere" });
+
+export default mongoose.model("Food", foodSchema);

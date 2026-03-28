@@ -1,14 +1,21 @@
 import { v2 as cloudinary } from "cloudinary"
 
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET
-})
+let isConfigured = false
 
-console.log("ENV CHECK ↓")
-console.log("CLOUD NAME:", process.env.CLOUDINARY_CLOUD_NAME)
-console.log("API KEY:", process.env.CLOUDINARY_API_KEY)
-console.log("API SECRET:", process.env.CLOUDINARY_API_SECRET)
+export function getCloudinary() {
+  if (!isConfigured) {
+    if (!process.env.CLOUDINARY_CLOUD_NAME) {
+      throw new Error("❌ Cloudinary ENV not loaded yet")
+    }
+    console.log("Cloud ENV:", process.env.CLOUDINARY_CLOUD_NAME)
+    cloudinary.config({
+      cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+      api_key: process.env.CLOUDINARY_API_KEY,
+      api_secret: process.env.CLOUDINARY_API_SECRET,
+    })
 
-export default cloudinary
+    isConfigured = true
+  }
+
+  return cloudinary
+}
