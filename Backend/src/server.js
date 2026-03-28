@@ -28,19 +28,7 @@ const allowedOrigins = [
 ].filter(Boolean);                       // Removes undefined values
 
 app.use(cors({
-  origin: function (origin, callback) {
-    // 🕵️‍♂️ DEBUG LOG: Check this in Render Logs to see the EXACT string being sent
-    console.log("Incoming Request Origin:", origin); 
-
-    if (!origin) return callback(null, true);
-    
-    if (allowedOrigins.indexOf(origin) !== -1) {
-      callback(null, true);
-    } else {
-      console.error(`CORS Fail! Origin ${origin} is NOT in allowed list:`, allowedOrigins);
-      callback(new Error("Not allowed by CORS"));
-    }
-  },
+  origin: "https://food-share-ai.vercel.app", // Hardcode exactly what Vercel uses
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"]
