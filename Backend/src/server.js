@@ -37,6 +37,22 @@ app.use(cors({
   },
   credentials: true
 }));
+app.use(cors({
+  origin: function (origin, callback) {
+    // 🕵️‍♂️ DEBUG LOG: Add this line to see the incoming origin in Render Logs
+    console.log("Incoming Request Origin:", origin); 
+
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      // 🕵️‍♂️ DEBUG LOG: This will tell you why it failed
+      console.error(`CORS Fail! Origin ${origin} not in:`, allowedOrigins);
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
+  credentials: true
+}));
 
 app.use(express.json({ limit: "10mb" })); 
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
