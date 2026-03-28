@@ -9,6 +9,8 @@ import foodRoutes from "./routes/food.routes.js";
 import ngoRoutes from "./routes/ngo.routes.js";
 import aiRoutes from "./routes/ai.routes.js";
 
+
+// 1. Connect Database
 const app = express();
 
 // 1. Connect Database
@@ -18,42 +20,33 @@ connectDB().then(() => {
     console.error("❌ MongoDB Initial Connection Failed:", err.message);
 });
 
-// 2. Middleware - UPDATED FOR PRODUCTION
+// 2. Middleware - CLEANED & FIXED
 const allowedOrigins = [
-  process.env.FRONTEND_URL,              // Your Vercel URL (from Env Var)
-  "https://food-share-ai.vercel.app",    // Hardcoded fallback for your project
+  process.env.FRONTEND_URL,              // https://food-share-ai.vercel.app
+  "https://food-share-ai.vercel.app",    // Hardcoded fallback
   "http://localhost:3000"                // Local development
-].filter(Boolean);                       // Removes undefined/null values
+].filter(Boolean);                       // Removes undefined values
 
 app.use(cors({
   origin: function (origin, callback) {
-    // Allow requests with no origin (like mobile apps)
-    if (!origin) return callback(null, true);
-    if (allowedOrigins.indexOf(origin) !== -1) {
-      callback(null, true);
-    } else {
-      callback(new Error("Not allowed by CORS"));
-    }
-  },
-  credentials: true
-}));
-app.use(cors({
-  origin: function (origin, callback) {
-    // 🕵️‍♂️ DEBUG LOG: Add this line to see the incoming origin in Render Logs
+    // 🕵️‍♂️ DEBUG LOG: Check this in Render Logs to see the EXACT string being sent
     console.log("Incoming Request Origin:", origin); 
 
     if (!origin) return callback(null, true);
+    
     if (allowedOrigins.indexOf(origin) !== -1) {
       callback(null, true);
     } else {
-      // 🕵️‍♂️ DEBUG LOG: This will tell you why it failed
-      console.error(`CORS Fail! Origin ${origin} not in:`, allowedOrigins);
+      console.error(`CORS Fail! Origin ${origin} is NOT in allowed list:`, allowedOrigins);
       callback(new Error("Not allowed by CORS"));
     }
   },
-  credentials: true
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"]
 }));
 
+// MUST come after CORS but before Routes
 app.use(express.json({ limit: "10mb" })); 
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 
