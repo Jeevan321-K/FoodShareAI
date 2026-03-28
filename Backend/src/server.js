@@ -11,35 +11,42 @@ import aiRoutes from "./routes/ai.routes.js";
 
 const app = express();
 
-// 1. Connect Database with Error Tracking
+// 1. Connect Database
 connectDB().then(() => {
     console.log("✅ MongoDB Connection Handshake Successful");
 }).catch(err => {
     console.error("❌ MongoDB Initial Connection Failed:", err.message);
 });
 
-// 2. Middleware
+// 2. Middleware - UPDATED FOR PRODUCTION
+const allowedOrigins = [
+  process.env.FRONTEND_URL,              // Your Vercel URL (from Env Var)
+  "https://food-share-ai.vercel.app",    // Hardcoded fallback for your project
+  "http://localhost:3000"                // Local development
+].filter(Boolean);                       // Removes undefined/null values
+
 app.use(cors({
-  origin: process.env.FRONTEND_URL || "http://localhost:3000",
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      console.log("🚫 Blocked by CORS:", origin);
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
   credentials: true
 }));
 
 app.use(express.json({ limit: "10mb" })); 
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 
-// 🚀 STAGE 1 DEBUG: Request Logger
-// If you click "Submit" and don't see this in the terminal, the request isn't reaching the server.
-// 🚀 STAGE 1 DEBUG: Request Logger (Fixed Version)
-// app.use((req, res, next) => {
-//   const timestamp = new Date().toLocaleTimeString();
-//   console.log(`\n[${timestamp}] 📥 ${req.method} request to: ${req.url}`);
-  
-//   // 🟢 Safer check: Ensure req.body exists before checking keys
-//   if (req.body && typeof req.body === 'object' && Object.keys(req.body).length > 0) {
-//     console.log("📦 Payload detected in body");
-//   }
-//   next();
-// });
+// 🚀 Request Logger (Uncomment for easier debugging on Render)
+app.use((req, res, next) => {
+  console.log(`[${new Date().toLocaleTimeString()}] 📥 ${req.method} ${req.url}`);
+  next();
+});
 
 // 3. Routes
 app.use("/api/auth", authRoutes);
@@ -50,44 +57,27 @@ app.use("/api/ngos", ngoRoutes);
 app.use("/api/ai", aiRoutes);
 
 app.get("/", (req, res) => {
-  res.send("API running 🚀");
+  res.send("API running 🚀 - Connection Healthy");
 });
 
-// 4. Final Fallback for 404s (Missing Routes)
+// 4. Fallback for 404s
 app.use((req, res) => {
-  console.log(`⚠️ 404 - Route not found: ${req.method} ${req.url}`);
   res.status(404).json({ success: false, message: "Route not found on server" });
 });
 
-// 5. 🟢 STAGE 2 DEBUG: Deep Global Error Handler
-// This catches "undefined" errors and prints the EXACT line number.
+// 5. Global Error Handler
 app.use((err, req, res, next) => {
-  console.error("\n" + "=".repeat(50));
-  console.error("🚨 BACKEND CRASH DETECTED 🚨");
-  console.error(`ERROR TYPE: ${err.name || "Unknown Error"}`);
-  console.error(`MESSAGE:    ${err.message || "No message provided"}`);
-  console.error(`PATH:       ${req.method} ${req.url}`);
-  
-  if (err.stack) {
-    console.error("\n🔍 STACK TRACE (Look for the first 'at' line with your filenames):");
-    console.error(err.stack);
-  } else {
-    console.error("No stack trace available for this error.");
-  }
-  console.error("=".repeat(50) + "\n");
-
+  console.error("🚨 BACKEND ERROR:", err.message);
   res.status(500).json({
     success: false,
-    message: "Internal Server Error - Check Backend Terminal",
-    errorType: err.name,
-    errorMessage: err.message,
-    // Stack is only sent to frontend in development to prevent map reuse crashes
-    stack: process.env.NODE_ENV === 'development' ? err.stack : "Hidden in Production"
+    message: "Internal Server Error",
+    error: process.env.NODE_ENV === 'development' ? err.stack : undefined
   });
 });
 
+// 6. Port Handling
+// Render uses process.env.PORT (usually 10000), default to 4000 locally
 const PORT = process.env.PORT || 4000;
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`\n🚀 Server running on port ${PORT} 🔥`);
-  console.log(`📡 Listening for frontend at: ${process.env.FRONTEND_URL || "http://localhost:3000"}`);
 });
