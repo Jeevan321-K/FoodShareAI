@@ -3,6 +3,8 @@ import express from "express";
 import cors from "cors";
 import connectDB from "./config/db.js";
 
+import swaggerUi from "swagger-ui-express"
+import swaggerJsDoc from "swagger-jsdoc"
 import userRoutes from "./routes/user.routes.js";
 import notificationRoutes from "./routes/notification.routes.js";
 import authRoutes from "./routes/auth.routes.js";
@@ -46,6 +48,27 @@ app.use(
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
+
+const options = {
+  definition: {
+    openapi: "3.0.0",
+    info: {
+      title: "FoodShare API",
+      version: "1.0.0",
+      description: "API documentation"
+    },
+    servers: [
+      {
+        url: "https://foodshareai-backend.onrender.com"
+      }
+    ]
+  },
+  apis: ["./routes/*.js"], // adjust if needed
+}
+
+const swaggerSpec = swaggerJsDoc(options)
+
+app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec))
 
 // Optional manual preflight handler
 app.use((req, res, next) => {
