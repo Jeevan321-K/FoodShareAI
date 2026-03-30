@@ -4,78 +4,93 @@
 
 @custom-variant dark (&:is(.dark *));
 
-:root {
-  /* LIGHT MODE - High brightness, standard HSL for reliability */
-  --background: 0 0% 100%;         /* Pure White */
-  --foreground: 224 71% 4%;        /* Near Black */
-  --card: 0 0% 100%;
-  --card-foreground: 224 71% 4%;
-  --popover: 0 0% 100%;
-  --popover-foreground: 224 71% 4%;
-  --primary: 142 76% 36%;         /* Solid Green */
-  --primary-foreground: 355 100% 100%;
-  --secondary: 220 14% 96%;
-  --secondary-foreground: 224 71% 4%;
-  --muted: 220 14% 96%;
-  --muted-foreground: 220 9% 46%;
-  --accent: 220 14% 96%;
-  --accent-foreground: 224 71% 4%;
-  --destructive: 0 84% 60%;
-  --destructive-foreground: 210 20% 98%;
-  --border: 220 13% 91%;
-  --input: 220 13% 91%;
-  --ring: 142 76% 36%;
-  
-  --radius: 0.625rem;
+@layer base {
+  :root {
+    /* LIGHT MODE - High brightness, standard HSL for reliability */
+    --background: 0 0% 100%;
+    /* Pure White */
+    --foreground: 224 71% 4%;
+    /* Near Black */
+    --card: 0 0% 100%;
+    --card-foreground: 224 71% 4%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 224 71% 4%;
+    --primary: 142 76% 36%;
+    /* Solid Green */
+    --primary-foreground: 355 100% 100%;
+    --secondary: 220 14% 96%;
+    --secondary-foreground: 224 71% 4%;
+    --muted: 220 14% 96%;
+    --muted-foreground: 220 9% 46%;
+    --accent: 220 14% 96%;
+    --accent-foreground: 224 71% 4%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 210 20% 98%;
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 142 76% 36%;
 
-  /* Sidebar Light Mode */
-  --sidebar: 0 0% 98%;
-  --sidebar-foreground: 240 5% 26%;
-  --sidebar-primary: 142 76% 36%;
-  --sidebar-primary-foreground: 0 0% 100%;
-  --sidebar-accent: 240 5% 96%;
-  --sidebar-accent-foreground: 240 6% 10%;
-  --sidebar-border: 220 13% 91%;
-  --sidebar-ring: 142 76% 36%;
-}
+    --radius: 0.625rem;
 
-.dark {
-  /* DARK MODE - The dark green/black theme from your dashboard */
-  --background: 224 71% 4%;        /* Dark Navy/Black */
-  --foreground: 210 20% 98%;
-  --card: 224 71% 4%;
-  --card-foreground: 210 20% 98%;
-  --popover: 224 71% 4%;
-  --popover-foreground: 210 20% 98%;
-  --primary: 142 70% 50%;         /* Bright Green for dark mode */
-  --primary-foreground: 144 5% 10%;
-  --secondary: 215 28% 17%;
-  --secondary-foreground: 210 20% 98%;
-  --muted: 215 28% 17%;
-  --muted-foreground: 217 10% 65%;
-  --accent: 215 28% 17%;
-  --accent-foreground: 210 20% 98%;
-  --destructive: 0 62% 30%;
-  --destructive-foreground: 210 20% 98%;
-  --border: 215 28% 17%;
-  --input: 215 28% 17%;
-  --ring: 142 70% 50%;
+    /* Sidebar Light Mode */
+    --sidebar: 0 0% 98%;
+    --sidebar-foreground: 240 5% 26%;
+    --sidebar-primary: 142 76% 36%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 5% 96%;
+    --sidebar-accent-foreground: 240 6% 10%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 142 76% 36%;
+  }
 
-  /* Sidebar Dark Mode */
-  --sidebar: 240 6% 10%;
-  --sidebar-foreground: 240 5% 96%;
-  --sidebar-primary: 142 70% 50%;
-  --sidebar-primary-foreground: 0 0% 100%;
-  --sidebar-accent: 240 4% 16%;
-  --sidebar-accent-foreground: 240 5% 96%;
-  --sidebar-border: 240 4% 16%;
-  --sidebar-ring: 142 70% 50%;
+  .dark {
+    /* DARK MODE - The dark green/black theme from your dashboard */
+    --background: 224 71% 4%;
+    /* Dark Navy/Black */
+    --foreground: 210 20% 98%;
+    --card: 224 71% 4%;
+    --card-foreground: 210 20% 98%;
+    --popover: 224 71% 4%;
+    --popover-foreground: 210 20% 98%;
+    --primary: 142 70% 50%;
+    /* Bright Green for dark mode */
+    --primary-foreground: 144 5% 10%;
+    --secondary: 215 28% 17%;
+    --secondary-foreground: 210 20% 98%;
+    --muted: 215 28% 17%;
+    --muted-foreground: 217 10% 65%;
+    --accent: 215 28% 17%;
+    --accent-foreground: 210 20% 98%;
+    --destructive: 0 62% 30%;
+    --destructive-foreground: 210 20% 98%;
+    --border: 215 28% 17%;
+    --input: 215 28% 17%;
+    --ring: 142 70% 50%;
+
+    /* Sidebar Dark Mode */
+    --sidebar: 240 6% 10%;
+    --sidebar-foreground: 240 5% 96%;
+    --sidebar-primary: 142 70% 50%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 4% 16%;
+    --sidebar-accent-foreground: 240 5% 96%;
+    --sidebar-border: 240 4% 16%;
+    --sidebar-ring: 142 70% 50%;
+  }
+
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
 }
 
 @theme inline {
   --font-sans: 'Geist', 'Geist Fallback';
   --font-mono: 'Geist Mono', 'Geist Mono Fallback';
-  
+
   /* Bind colors to HSL variables */
   --color-background: hsl(var(--background));
   --color-foreground: hsl(var(--foreground));
@@ -110,31 +125,6 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
-}
-
-@layer base {
-  * {
-    @apply border-border outline-ring/50;
-  }
-  body {
-    @apply bg-background text-foreground;
-  }
-}
-
-@layer base {
-  :root {
-    --background: 0 0% 100%;
-    --card: 0 0% 100%; /* White in light mode */
-    --card-foreground: 222.2 84% 4.9%;
-    --border: 214.3 31.8% 91.4%;
-  }
-
-  .dark {
-    --background: 222.2 84% 4.9%;
-    --card: 222.2 84% 4.9%; /* Must be dark in dark mode */
-    --card-foreground: 210 40% 98%;
-    --border: 217.2 32.6% 17.5%;
-  }
 }
 
 /* Updated Input Fix to follow Theme */
